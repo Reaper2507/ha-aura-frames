@@ -27,7 +27,6 @@ class AuraFrameButton(AuraFrameEntity, ButtonEntity):
     async def async_press(self) -> None:
         data = {"frame_id": self.frame_id}
         if self._action == "show_now":
-            assets = self.frame.get("recent_assets") or []
-            if assets:
-                data["asset_id"] = assets[0].get("id")
+            data["asset_id"] = (self.frame.get("current_asset") or {}).get("id")
         await self.hass.services.async_call(DOMAIN, self._action, data, blocking=True)
+
