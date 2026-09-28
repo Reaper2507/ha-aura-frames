@@ -33,7 +33,7 @@ class AuraApi:
         async with self._session.request(method, f"{API_BASE}{path}", headers=headers, **kwargs) as response:
             payload = await response.json(content_type=None)
             if response.status >= 400 or payload.get("error"):
-                raise AuraApiError(f"Aura API HTTP {response.status}")
+                raise AuraApiError(f"Aura API HTTP {response.status} for {method} {path}")
             return payload
 
     async def login(self) -> None:
