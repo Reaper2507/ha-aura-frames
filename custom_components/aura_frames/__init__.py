@@ -38,8 +38,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             await coordinator.async_request_refresh()
         elif action == SERVICE_NEXT:
             await coordinator.navigate(frame_id, 1)
+            return
         elif action == SERVICE_PREVIOUS:
             await coordinator.navigate(frame_id, -1)
+            return
         elif action == "exclude_asset":
             await coordinator.api.exclude_asset(frame_id, call.data["asset_id"])
         elif action == "include_asset":
