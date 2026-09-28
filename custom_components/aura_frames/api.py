@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from hashlib import sha256
 from typing import Any
 from uuid import uuid4
 
@@ -19,6 +20,11 @@ class AuraApi:
         self._password = password
         self._token: str | None = None
         self._user_id: str | None = None
+        # Aura's client accepts a device identifier and the community client
+        # recommends making it stable and unique instead of using all zeros.
+        self._device_identifier = sha256(
+            f"aura-ha:{email.strip().lower()}".encode("utf-8")
+        ).hexdigest()[:16]
         # Aura's maintained reverse-engineered client uses HTTP/2 for the
         # pushd API. The write endpoints are not reliable over HTTP/1.1.
         self._client = httpx.AsyncClient(
@@ -28,8 +34,8 @@ class AuraApi:
                 "cache-control": "no-cache",
                 "user-agent": "Aura/4.7.790 (Android 30; Client)",
                 "content-type": "application/json; charset=utf-8",
-                "x-device-identifier": "0000000000000000",
-                "x-client-device-id": "0000000000000000",
+                "x-device-identifier": self._device_identifier,
+                "x-client-device-id": self._device_identifier,
             },
             timeout=20.0,
         )
@@ -68,8 +74,8 @@ class AuraApi:
             "user": {"email": self._email, "password": self._password},
             "locale": "en-US",
             "app_identifier": "com.pushd.client",
-            "identifier_for_vendor": "0000000000000000",
-            "client_device_id": "0000000000000000",
+            "identifier_for_vendor": self._device_identifier,
+            "client_device_id": self._device_identifier,
         }
         response = await self._request("POST", "/login.json", json=payload)
         user = response.get("result", {}).get("current_user") or {}
