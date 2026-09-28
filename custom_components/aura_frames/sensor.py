@@ -80,5 +80,6 @@ class AuraFramePhotoSensor(CoordinatorEntity[AuraCoordinator], SensorEntity):
     @property
     def extra_state_attributes(self):
         asset = self._asset
-        return {"asset_id": asset.get("id"), "file_name": asset.get("file_name"), "image_url": self.native_value, "selected": asset.get("selected"), "taken_at": asset.get("taken_at")}
+        return {"asset_id": asset.get("id"), "file_name": asset.get("file_name"), "image_url": self.native_value, "selected": asset.get("selected"), "taken_at": asset.get("taken_at"), "reported_at": self._frame.get("last_impression_at"), "image_source": "frame_last_impression" if asset else "not_reported", "impression_fields": sorted((self._frame.get("last_impression") or {}).keys()) if isinstance(self._frame.get("last_impression"), dict) else []}
+
 
