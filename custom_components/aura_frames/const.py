@@ -6,6 +6,4 @@ PLATFORMS = ["sensor", "camera", "button", "switch", "number", "select"]
 SERVICE_SHOW_NOW = "show_now"
 SERVICE_NEXT = "next"
 SERVICE_PREVIOUS = "previous"
-SERVICE_SLEEP = "sleep"
-SERVICE_WAKE = "wake"
 SERVICE_REFRESH = "refresh"
