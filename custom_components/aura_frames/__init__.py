@@ -12,8 +12,6 @@ from .const import (
     SERVICE_PREVIOUS,
     SERVICE_REFRESH,
     SERVICE_SHOW_NOW,
-    SERVICE_SLEEP,
-    SERVICE_WAKE,
 )
 from .coordinator import AuraCoordinator
 
@@ -39,17 +37,21 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             await coordinator.api.show_now(frame_id, asset_id)
         elif action == SERVICE_REFRESH:
             await coordinator.async_request_refresh()
-        else:
-            changes = {SERVICE_SLEEP: {"scheduled_display_sleep": True}, SERVICE_WAKE: {"scheduled_display_sleep": False}}.get(action)
-            if changes:
-                await coordinator.api.update_frame(frame_id, changes)
-            elif action in (SERVICE_NEXT, SERVICE_PREVIOUS):
-                assets = frame.get("recent_assets") or []
-                if assets:
-                    await coordinator.api.show_now(frame_id, assets[0]["id"])
+        elif action == SERVICE_NEXT:
+            await coordinator.navigate(frame_id, 1)
+        elif action == SERVICE_PREVIOUS:
+            await coordinator.navigate(frame_id, -1)
+        elif action == "exclude_asset":
+            await coordinator.api.exclude_asset(frame_id, call.data["asset_id"])
+        elif action == "include_asset":
+            await coordinator.api.select_asset(frame_id, call.data["asset_id"])
+        elif action == "remove_asset":
+            await coordinator.api.remove_asset(frame_id, call.data["asset_id"])
+        elif action == "delete_asset":
+            await coordinator.api.delete_asset(call.data["asset_id"])
         await coordinator.async_request_refresh()
 
-    for service in (SERVICE_SHOW_NOW, SERVICE_NEXT, SERVICE_PREVIOUS, SERVICE_SLEEP, SERVICE_WAKE, SERVICE_REFRESH):
+    for service in (SERVICE_SHOW_NOW, SERVICE_NEXT, SERVICE_PREVIOUS, SERVICE_REFRESH, "exclude_asset", "include_asset", "remove_asset", "delete_asset"):
         if not hass.services.has_service(DOMAIN, service):
             hass.services.async_register(DOMAIN, service, handle_frame_action)
 
