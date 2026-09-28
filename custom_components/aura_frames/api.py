@@ -37,6 +37,7 @@ class AuraApi:
         return bool(self._token and self._user_id)
 
     async def _request(self, method: str, path: str, **kwargs: Any) -> dict[str, Any]:
+        retry_auth = kwargs.pop("_retry_auth", True)
         headers: dict[str, str] = {}
         if self._token and self._user_id:
             headers.update({"x-token-auth": self._token, "x-user-id": self._user_id})
@@ -46,6 +47,10 @@ class AuraApi:
             if response.status_code == 401 and path != "/login.json":
                 self._token = None
                 self._user_id = None
+                if retry_auth:
+                    await response.aclose()
+                    await self.login()
+                    return await self._request(method, path, _retry_auth=False, **kwargs)
             if response.status_code >= 400 or payload.get("error"):
                 detail = payload.get("error") or payload.get("message") or ""
                 raise AuraApiError(f"Aura API HTTP {response.status_code} for {method} {path}: {detail}")
