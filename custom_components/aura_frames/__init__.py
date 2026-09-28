@@ -14,12 +14,14 @@ from .const import (
     SERVICE_SHOW_NOW,
 )
 from .coordinator import AuraCoordinator
+from .upload import async_register_upload
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     coordinator = AuraCoordinator(hass, entry)
     await coordinator.async_config_entry_first_refresh()
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = coordinator
+    await async_register_upload(hass)
 
     async def handle_frame_action(call: ServiceCall) -> None:
         frame_id = call.data["frame_id"]
@@ -76,5 +78,4 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if coordinator:
         await coordinator.async_close()
     return unloaded
-
 
