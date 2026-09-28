@@ -82,7 +82,7 @@ class AuraApi:
             json={
                 "asset_id": asset_id,
                 "frame_id": frame_id,
-                "goto_time": datetime.now(timezone.utc).isoformat(),
+                "goto_time": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
                 "swipe_direction": 0,
                 "impression_id": str(uuid4()),
                 "select_asset": True,
@@ -103,4 +103,5 @@ class AuraApi:
 
     async def update_frame(self, frame_id: str, changes: dict[str, Any]) -> dict[str, Any]:
         return await self._request("PUT", f"/frames/{frame_id}.json", json={"frame": changes})
+
 
