@@ -12,7 +12,8 @@ from .coordinator import AuraCoordinator
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
     coordinator: AuraCoordinator = hass.data[DOMAIN][entry.entry_id]
-    async_add_entities([AuraFrameSelect(coordinator, frame_id) for frame_id in coordinator.data if coordinator.data[frame_id].get("sort_mode") in ("chronological", "random")])
+    # A null value is an unset preference, not evidence of missing hardware.
+    async_add_entities([AuraFrameSelect(coordinator, frame_id) for frame_id in coordinator.data if "sort_mode" in coordinator.data[frame_id]])
 
 
 class AuraFrameSelect(AuraFrameEntity, SelectEntity):
