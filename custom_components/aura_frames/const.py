@@ -1,0 +1,11 @@
+DOMAIN = "aura_frames"
+API_BASE = "https://api.pushd.com/v5"
+CONF_EMAIL = "email"
+CONF_PASSWORD = "password"
+PLATFORMS = ["sensor"]
+SERVICE_SHOW_NOW = "show_now"
+SERVICE_NEXT = "next"
+SERVICE_PREVIOUS = "previous"
+SERVICE_SLEEP = "sleep"
+SERVICE_WAKE = "wake"
+SERVICE_REFRESH = "refresh"
