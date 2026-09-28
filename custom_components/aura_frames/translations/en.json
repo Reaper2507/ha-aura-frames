@@ -1,0 +1,1 @@
+{"config":{"step":{"user":{"title":"Connect Aura Frames","description":"Enter the Aura account used by your frames.","data":{"email":"Email","password":"Password"}}},"error":{"cannot_connect":"Unable to authenticate with Aura Frames."},"abort":{"already_configured":"This Aura account is already configured."}}}
