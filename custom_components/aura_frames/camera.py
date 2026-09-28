@@ -32,7 +32,10 @@ class AuraFrameCamera(CoordinatorEntity[AuraCoordinator], Camera):
     @property
     def _asset_url(self) -> str | None:
         asset = self._frame.get("current_asset") or {}
-        return next((asset.get(key) for key in ("image_url", "landscape_url", "portrait_url", "thumbnail_url") if asset.get(key)), None)
+        url = next((asset.get(key) for key in ("image_url", "landscape_url", "portrait_url", "thumbnail_url") if asset.get(key)), None)
+        if url and url.lower().endswith((".heic", ".heif")):
+            return url.rsplit(".", 1)[0] + ".jpeg"
+        return url
 
     @property
     def name(self) -> str:
@@ -50,3 +53,4 @@ class AuraFrameCamera(CoordinatorEntity[AuraCoordinator], Camera):
             if response.status != 200:
                 return None
             return await response.read()
+
