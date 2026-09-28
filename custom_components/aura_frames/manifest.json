@@ -1,7 +1,7 @@
 {
   "domain": "aura_frames",
   "name": "Aura Frames",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "documentation": "https://github.com/Reaper2507/ha-aura-frames",
   "issue_tracker": "https://github.com/Reaper2507/ha-aura-frames/issues",
   "codeowners": ["@Reaper2507"],
