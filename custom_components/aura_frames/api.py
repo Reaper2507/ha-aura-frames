@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from typing import Any
+from uuid import uuid4
 
 from aiohttp import ClientSession
 
@@ -54,9 +55,25 @@ class AuraApi:
         response = await self._request("GET", "/frames.json")
         return response.get("frames") or []
 
-    async def assets(self, frame_id: str, limit: int = 3) -> list[dict[str, Any]]:
-        response = await self._request("GET", f"/frames/{frame_id}/assets.json", params={"limit": limit})
-        return response.get("assets") or []
+    async def frame(self, frame_id: str) -> dict[str, Any]:
+        response = await self._request("GET", f"/frames/{frame_id}.json")
+        return response.get("frame") or {}
+
+    async def assets_page(self, frame_id: str, limit: int = 1000, cursor: str | None = None) -> tuple[list[dict[str, Any]], str | None]:
+        params: dict[str, Any] = {"limit": limit}
+        if cursor:
+            params["cursor"] = cursor
+        response = await self._request("GET", f"/frames/{frame_id}/assets.json", params=params)
+        return response.get("assets") or [], response.get("next_page_cursor")
+
+    async def assets(self, frame_id: str, limit: int = 1000) -> list[dict[str, Any]]:
+        assets: list[dict[str, Any]] = []
+        cursor: str | None = None
+        while True:
+            page, cursor = await self.assets_page(frame_id, limit, cursor)
+            assets.extend(page)
+            if not cursor or not page:
+                return assets
 
     async def show_now(self, frame_id: str, asset_id: str) -> dict[str, Any]:
         return await self._request(
@@ -67,9 +84,22 @@ class AuraApi:
                 "frame_id": frame_id,
                 "goto_time": datetime.now(timezone.utc).isoformat(),
                 "swipe_direction": 0,
+                "impression_id": str(uuid4()),
                 "select_asset": True,
             },
         )
+
+    async def select_asset(self, frame_id: str, asset_id: str) -> dict[str, Any]:
+        return await self._request("POST", f"/frames/{frame_id}/select_asset.json", json={"assets": [{"asset_id": asset_id}]})
+
+    async def exclude_asset(self, frame_id: str, asset_id: str) -> dict[str, Any]:
+        return await self._request("POST", f"/frames/{frame_id}/exclude_asset", json={"assets": [{"asset_id": asset_id}]})
+
+    async def remove_asset(self, frame_id: str, asset_id: str) -> dict[str, Any]:
+        return await self._request("POST", f"/frames/{frame_id}/remove_asset.json", json={"assets": [{"asset_id": asset_id}]})
+
+    async def delete_asset(self, asset_id: str) -> dict[str, Any]:
+        return await self._request("DELETE", f"/assets/{asset_id}.json")
 
     async def update_frame(self, frame_id: str, changes: dict[str, Any]) -> dict[str, Any]:
         return await self._request("PUT", f"/frames/{frame_id}.json", json={"frame": changes})
