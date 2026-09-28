@@ -1,0 +1,13 @@
+{
+  "domain": "aura_frames",
+  "name": "Aura Frames",
+  "version": "0.1.0",
+  "documentation": "https://github.com/Reaper2507/ha-aura-frames",
+  "issue_tracker": "https://github.com/Reaper2507/ha-aura-frames/issues",
+  "codeowners": ["@Reaper2507"],
+  "config_flow": true,
+  "iot_class": "cloud_polling",
+  "requirements": [],
+  "integration_type": "hub",
+  "loggers": ["custom_components.aura_frames"]
+}
