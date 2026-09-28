@@ -7,7 +7,7 @@
   "codeowners": ["@Reaper2507"],
   "config_flow": true,
   "iot_class": "cloud_polling",
-  "requirements": [],
+  "requirements": ["httpx[http2]>=0.27.0"],
   "integration_type": "hub",
   "loggers": ["custom_components.aura_frames"]
 }
