@@ -37,12 +37,45 @@ class AuraCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
             data: dict[str, dict[str, Any]] = {}
             for frame in frames:
                 frame_id = frame["id"]
+                details = await self.api.frame(frame_id)
+                merged = {**frame, **details}
                 assets = await self.api.assets(frame_id)
-                frame["recent_assets"] = assets
-                data[frame_id] = frame
+                merged["all_assets"] = assets
+                merged["recent_assets"] = assets[:3]
+                merged["current_asset"] = self._current_asset(merged, assets)
+                data[frame_id] = merged
             return data
         except AuraApiError as err:
             raise UpdateFailed(str(err)) from err
+
+    @staticmethod
+    def _current_asset(frame: dict[str, Any], assets: list[dict[str, Any]]) -> dict[str, Any]:
+        impression = frame.get("last_impression") or {}
+        impression_asset = impression.get("asset") if isinstance(impression, dict) else None
+        if isinstance(impression_asset, dict) and impression_asset.get("id"):
+            return impression_asset
+        current_id = impression.get("asset_id") if isinstance(impression, dict) else None
+        current_id = current_id or frame.get("representative_asset_id")
+        if current_id:
+            for asset in assets:
+                if asset.get("id") == current_id:
+                    return asset
+        return assets[0] if assets else {}
+
+    async def navigate(self, frame_id: str, direction: int) -> None:
+        frame = self.data.get(frame_id, {})
+        assets = frame.get("all_assets") or []
+        current = frame.get("current_asset") or {}
+        if not assets or not current.get("id"):
+            raise AuraApiError("No current Aura asset available")
+        ids = [asset.get("id") for asset in assets]
+        try:
+            index = ids.index(current["id"])
+        except ValueError:
+            index = 0
+        target = assets[(index + direction) % len(assets)]
+        await self.api.show_now(frame_id, target["id"])
+        await self.async_request_refresh()
 
     async def async_close(self) -> None:
         return None
