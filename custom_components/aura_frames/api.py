@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from typing import Any
 from uuid import uuid4
 
-from aiohttp import ClientSession
+import httpx
 
 from .const import API_BASE
 
@@ -14,35 +14,47 @@ class AuraApiError(Exception):
 
 
 class AuraApi:
-    def __init__(self, session: ClientSession, email: str, password: str) -> None:
-        self._session = session
+    def __init__(self, session: object, email: str, password: str) -> None:
         self._email = email
         self._password = password
         self._token: str | None = None
         self._user_id: str | None = None
+        # Aura's maintained reverse-engineered client uses HTTP/2 for the
+        # pushd API. The write endpoints are not reliable over HTTP/1.1.
+        self._client = httpx.AsyncClient(
+            http2=True,
+            headers={
+                "accept-language": "en-US",
+                "cache-control": "no-cache",
+                "user-agent": "Aura/4.7.790 (Android 30; Client)",
+                "content-type": "application/json; charset=utf-8",
+            },
+            timeout=20.0,
+        )
 
     @property
     def authenticated(self) -> bool:
         return bool(self._token and self._user_id)
 
     async def _request(self, method: str, path: str, **kwargs: Any) -> dict[str, Any]:
-        headers = {
-            "accept-language": "en-US",
-            "cache-control": "no-cache",
-            "user-agent": "Aura/4.7.790 (Android 30; Client)",
-            "content-type": "application/json; charset=utf-8",
-        }
+        headers: dict[str, str] = {}
         if self._token and self._user_id:
             headers.update({"x-token-auth": self._token, "x-user-id": self._user_id})
-        async with self._session.request(method, f"{API_BASE}{path}", headers=headers, **kwargs) as response:
-            payload = await response.json(content_type=None)
-            if response.status == 401 and path != "/login.json":
+        response = await self._client.request(method, f"{API_BASE}{path}", headers=headers, **kwargs)
+        try:
+            payload = response.json()
+            if response.status_code == 401 and path != "/login.json":
                 self._token = None
                 self._user_id = None
-            if response.status >= 400 or payload.get("error"):
+            if response.status_code >= 400 or payload.get("error"):
                 detail = payload.get("error") or payload.get("message") or ""
-                raise AuraApiError(f"Aura API HTTP {response.status} for {method} {path}: {detail}")
+                raise AuraApiError(f"Aura API HTTP {response.status_code} for {method} {path}: {detail}")
             return payload
+        finally:
+            await response.aclose()
+
+    async def close(self) -> None:
+        await self._client.aclose()
 
     async def login(self) -> None:
         payload = {
