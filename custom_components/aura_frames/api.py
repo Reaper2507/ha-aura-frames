@@ -21,6 +21,10 @@ class AuraApi:
         self._token: str | None = None
         self._user_id: str | None = None
 
+    @property
+    def authenticated(self) -> bool:
+        return bool(self._token and self._user_id)
+
     async def _request(self, method: str, path: str, **kwargs: Any) -> dict[str, Any]:
         headers = {
             "accept-language": "en-US",
@@ -32,6 +36,9 @@ class AuraApi:
             headers.update({"x-token-auth": self._token, "x-user-id": self._user_id})
         async with self._session.request(method, f"{API_BASE}{path}", headers=headers, **kwargs) as response:
             payload = await response.json(content_type=None)
+            if response.status == 401 and path != "/login.json":
+                self._token = None
+                self._user_id = None
             if response.status >= 400 or payload.get("error"):
                 raise AuraApiError(f"Aura API HTTP {response.status} for {method} {path}")
             return payload
