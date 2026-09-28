@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import timedelta
+import logging
 from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
@@ -10,6 +11,8 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 
 from .api import AuraApi, AuraApiError
 from .const import DOMAIN
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class AuraCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
@@ -22,7 +25,7 @@ class AuraCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
         self.entry = entry
         super().__init__(
             hass,
-            logger=hass.logger,
+            logger=_LOGGER,
             name=DOMAIN,
             update_interval=timedelta(minutes=5),
         )
