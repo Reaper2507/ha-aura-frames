@@ -66,8 +66,8 @@ class AuraApi:
     async def login(self) -> None:
         payload = {
             "user": {"email": self._email, "password": self._password},
-            "locale": "en-US",
-            "app_identifier": "com.pushd.client",
+            "locale": "en",
+            "app_identifier": "com.pushd.Framelord",
             "identifier_for_vendor": "0000000000000000",
             "client_device_id": "0000000000000000",
         }
