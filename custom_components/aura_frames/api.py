@@ -119,6 +119,15 @@ class AuraApi:
     async def select_asset(self, frame_id: str, asset_id: str) -> dict[str, Any]:
         return await self._request("POST", f"/frames/{frame_id}/select_asset.json", json={"assets": [{"asset_id": asset_id}]})
 
+    async def select_local_asset(self, frame_id: str, local_identifier: str) -> dict[str, Any]:
+        return await self._request("POST", f"/frames/{frame_id}/select_asset.json", json={"assets": [{"asset_local_identifier": local_identifier}]})
+
+    async def batch_update_asset(self, metadata: dict[str, Any]) -> dict[str, Any]:
+        return await self._request("PUT", "/assets/batch_update.json", json={"assets": [metadata]})
+
+    async def asset_by_local_identifier(self, local_identifier: str) -> dict[str, Any]:
+        return await self._request("GET", "/assets/asset_for_local_identifier.json", params={"local_identifier": local_identifier})
+
     async def exclude_asset(self, frame_id: str, asset_id: str) -> dict[str, Any]:
         return await self._request("POST", f"/frames/{frame_id}/exclude_asset", json={"assets": [{"asset_id": asset_id}]})
 
@@ -130,5 +139,4 @@ class AuraApi:
 
     async def update_frame(self, frame_id: str, changes: dict[str, Any]) -> dict[str, Any]:
         return await self._request("PUT", f"/frames/{frame_id}.json", json={"frame": changes})
-
 
