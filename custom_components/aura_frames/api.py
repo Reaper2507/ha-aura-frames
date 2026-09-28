@@ -40,7 +40,8 @@ class AuraApi:
                 self._token = None
                 self._user_id = None
             if response.status >= 400 or payload.get("error"):
-                raise AuraApiError(f"Aura API HTTP {response.status} for {method} {path}")
+                detail = payload.get("error") or payload.get("message") or ""
+                raise AuraApiError(f"Aura API HTTP {response.status} for {method} {path}: {detail}")
             return payload
 
     async def login(self) -> None:
