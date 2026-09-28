@@ -33,8 +33,8 @@ class AuraFrameCamera(CoordinatorEntity[AuraCoordinator], Camera):
     def _asset_url(self) -> str | None:
         asset = self._frame.get("current_asset") or {}
         url = next((asset.get(key) for key in ("image_url", "landscape_url", "portrait_url", "thumbnail_url") if asset.get(key)), None)
-        if url and url.lower().endswith((".heic", ".heif")):
-            return url.rsplit(".", 1)[0] + ".jpeg"
+        # Aura's CDN can serve JPEG bytes from a .heic URL. The URL is opaque;
+        # changing its extension produces a different, often nonexistent asset.
         return url
 
     @property
