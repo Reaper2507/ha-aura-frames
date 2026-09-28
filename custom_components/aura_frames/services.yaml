@@ -19,21 +19,42 @@ previous:
     frame_id:
       required: true
       selector: {text: {}}
-sleep:
-  name: Sleep frame
-  fields:
-    frame_id:
-      required: true
-      selector: {text: {}}
-wake:
-  name: Wake frame
-  fields:
-    frame_id:
-      required: true
-      selector: {text: {}}
 refresh:
   name: Refresh
   fields:
     frame_id:
+      required: true
+      selector: {text: {}}
+exclude_asset:
+  name: Exclude asset from slideshow
+  fields:
+    frame_id:
+      required: true
+      selector: {text: {}}
+    asset_id:
+      required: true
+      selector: {text: {}}
+include_asset:
+  name: Include asset in slideshow
+  fields:
+    frame_id:
+      required: true
+      selector: {text: {}}
+    asset_id:
+      required: true
+      selector: {text: {}}
+remove_asset:
+  name: Remove asset from frame
+  fields:
+    frame_id:
+      required: true
+      selector: {text: {}}
+    asset_id:
+      required: true
+      selector: {text: {}}
+delete_asset:
+  name: Delete asset permanently
+  fields:
+    asset_id:
       required: true
       selector: {text: {}}
