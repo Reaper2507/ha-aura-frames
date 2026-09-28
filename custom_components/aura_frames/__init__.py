@@ -23,6 +23,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     async def handle_frame_action(call: ServiceCall) -> None:
         frame_id = call.data["frame_id"]
+        # Services survive config-entry reloads. Resolve the live coordinator
+        # for each call instead of retaining a closed API client in this closure.
+        coordinator = next(
+            (item for item in hass.data.get(DOMAIN, {}).values() if frame_id in item.data),
+            None,
+        )
+        if coordinator is None:
+            raise AuraApiError("Unknown Aura frame")
         frame = coordinator.data.get(frame_id)
         if not frame:
             raise AuraApiError("Unknown Aura frame")
@@ -62,6 +70,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     unloaded = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    if not unloaded:
+        return False
     coordinator = hass.data.get(DOMAIN, {}).pop(entry.entry_id, None)
     if coordinator:
         await coordinator.async_close()
