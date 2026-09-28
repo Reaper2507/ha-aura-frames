@@ -86,6 +86,6 @@ class AuraCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
         self.data[frame_id]["current_asset"] = target
 
     async def async_close(self) -> None:
-        return None
+        await self.api.close()
 
 
