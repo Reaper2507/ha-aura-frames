@@ -38,12 +38,7 @@ class AuraCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
             data: dict[str, dict[str, Any]] = {}
             for frame in frames:
                 frame_id = frame["id"]
-                try:
-                    details = await self.api.frame(frame_id)
-                except AuraApiError as err:
-                    _LOGGER.warning("Aura frame detail unavailable for %s; using frames.json data: %s", frame_id, err)
-                    details = {}
-                merged = {**frame, **details}
+                merged = dict(frame)
                 assets = await self.api.assets(frame_id)
                 merged["all_assets"] = assets
                 merged["recent_assets"] = assets[:3]
