@@ -30,8 +30,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         if action == SERVICE_SHOW_NOW:
             asset_id = call.data.get("asset_id")
             if not asset_id:
-                assets = frame.get("recent_assets") or []
-                asset_id = (assets[0] if assets else {}).get("id")
+                asset_id = (frame.get("current_asset") or {}).get("id")
             if not asset_id:
                 raise AuraApiError("No asset available for frame")
             await coordinator.api.show_now(frame_id, asset_id)
@@ -65,4 +64,5 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if coordinator:
         await coordinator.async_close()
     return unloaded
+
 
