@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from homeassistant.components.camera import Camera, CameraEntityFeature
+from homeassistant.components.camera import Camera
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
@@ -18,8 +18,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
 
 class AuraFrameCamera(CoordinatorEntity[AuraCoordinator], Camera):
     _attr_icon = "mdi:image-frame"
-    _attr_supported_features = CameraEntityFeature.ON_OFF
-
     def __init__(self, coordinator: AuraCoordinator, frame_id: str) -> None:
         CoordinatorEntity.__init__(self, coordinator)
         Camera.__init__(self)
@@ -33,8 +31,7 @@ class AuraFrameCamera(CoordinatorEntity[AuraCoordinator], Camera):
 
     @property
     def _asset_url(self) -> str | None:
-        assets = self._frame.get("recent_assets") or []
-        asset = assets[0] if assets else {}
+        asset = self._frame.get("current_asset") or {}
         return next((asset.get(key) for key in ("image_url", "landscape_url", "portrait_url", "thumbnail_url") if asset.get(key)), None)
 
     @property
