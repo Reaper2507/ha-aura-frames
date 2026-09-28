@@ -1,0 +1,39 @@
+show_now:
+  name: Show now
+  fields:
+    frame_id:
+      required: true
+      selector: {text: {}}
+    asset_id:
+      required: false
+      selector: {text: {}}
+next:
+  name: Next image
+  fields:
+    frame_id:
+      required: true
+      selector: {text: {}}
+previous:
+  name: Previous image
+  fields:
+    frame_id:
+      required: true
+      selector: {text: {}}
+sleep:
+  name: Sleep frame
+  fields:
+    frame_id:
+      required: true
+      selector: {text: {}}
+wake:
+  name: Wake frame
+  fields:
+    frame_id:
+      required: true
+      selector: {text: {}}
+refresh:
+  name: Refresh
+  fields:
+    frame_id:
+      required: true
+      selector: {text: {}}
