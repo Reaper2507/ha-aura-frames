@@ -32,7 +32,8 @@ class AuraCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
 
     async def _async_update_data(self) -> dict[str, dict[str, Any]]:
         try:
-            await self.api.login()
+            if not self.api.authenticated:
+                await self.api.login()
             frames = await self.api.frames()
             data: dict[str, dict[str, Any]] = {}
             for frame in frames:
