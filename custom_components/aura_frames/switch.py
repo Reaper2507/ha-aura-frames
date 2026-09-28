@@ -14,7 +14,7 @@ SWITCHES = (("auto_brightness", "Auto brightness"), ("slideshow_auto", "Slidesho
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
     coordinator: AuraCoordinator = hass.data[DOMAIN][entry.entry_id]
-    async_add_entities([AuraFrameSwitch(coordinator, frame_id, *definition) for frame_id in coordinator.data for definition in SWITCHES])
+    async_add_entities([AuraFrameSwitch(coordinator, frame_id, *definition) for frame_id in coordinator.data for definition in SWITCHES if definition[0] in coordinator.data[frame_id]])
 
 
 class AuraFrameSwitch(AuraFrameEntity, SwitchEntity):
