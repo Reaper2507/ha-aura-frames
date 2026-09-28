@@ -28,6 +28,8 @@ class AuraApi:
                 "cache-control": "no-cache",
                 "user-agent": "Aura/4.7.790 (Android 30; Client)",
                 "content-type": "application/json; charset=utf-8",
+                "x-device-identifier": "0000000000000000",
+                "x-client-device-id": "0000000000000000",
             },
             timeout=20.0,
         )
