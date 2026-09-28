@@ -45,7 +45,7 @@ class AuraFrameSensor(CoordinatorEntity[AuraCoordinator], SensorEntity):
     @property
     def extra_state_attributes(self):
         f = self._frame
-        return {k: f.get(k) for k in ("display_aspect_ratio", "num_assets", "brightness", "auto_brightness", "slideshow_auto", "slideshow_interval", "sort_mode", "scheduled_display_sleep", "gestures_on", "live_photos_on", "sense_motion", "volume", "software_version", "build_version", "hw_android_version", "time_zone", "features")}
+        return {k: f.get(k) for k in ("display_aspect_ratio", "num_assets", "brightness", "auto_brightness", "slideshow_auto", "slideshow_interval", "sort_mode", "scheduled_display_sleep", "scheduled_display_on_at", "scheduled_display_off_at", "gestures_on", "live_photos_on", "sense_motion", "volume", "software_version", "build_version", "hw_android_version", "time_zone", "features", "frame_environment", "playlists", "smart_adds", "auto_processed_playlist_ids") if k in f}
 
 
 class AuraFramePhotoSensor(CoordinatorEntity[AuraCoordinator], SensorEntity):
@@ -62,8 +62,7 @@ class AuraFramePhotoSensor(CoordinatorEntity[AuraCoordinator], SensorEntity):
 
     @property
     def _asset(self):
-        assets = self._frame.get("recent_assets") or []
-        return assets[0] if assets else {}
+        return self._frame.get("current_asset") or {}
 
     @property
     def name(self) -> str:
@@ -81,5 +80,5 @@ class AuraFramePhotoSensor(CoordinatorEntity[AuraCoordinator], SensorEntity):
     @property
     def extra_state_attributes(self):
         asset = self._asset
-        return {"asset_id": asset.get("id"), "file_name": asset.get("file_name"), "image_url": self.native_value}
+        return {"asset_id": asset.get("id"), "file_name": asset.get("file_name"), "image_url": self.native_value, "selected": asset.get("selected"), "taken_at": asset.get("taken_at")}
 
