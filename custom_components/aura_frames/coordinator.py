@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import timedelta
+from time import monotonic
 import logging
 from typing import Any
 
@@ -23,11 +24,12 @@ class AuraCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
             entry.data["password"],
         )
         self.entry = entry
+        self._assets_cache = {}
         super().__init__(
             hass,
             logger=_LOGGER,
             name=DOMAIN,
-            update_interval=timedelta(minutes=5),
+            update_interval=timedelta(seconds=30),
         )
 
     async def _async_update_data(self) -> dict[str, dict[str, Any]]:
@@ -39,7 +41,13 @@ class AuraCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
             for frame in frames:
                 frame_id = frame["id"]
                 merged = dict(frame)
-                assets = await self.api.assets(frame_id)
+                merged.update(await self.api.frame(frame_id))
+                cached = self._assets_cache.get(frame_id)
+                if cached is None or monotonic() - cached[0] >= 300:
+                    assets = await self.api.assets(frame_id)
+                    self._assets_cache[frame_id] = (monotonic(), assets)
+                else:
+                    assets = cached[1]
                 merged["all_assets"] = assets
                 merged["recent_assets"] = assets[:3]
                 merged["current_asset"] = self._current_asset(merged, assets)
@@ -55,12 +63,12 @@ class AuraCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
         if isinstance(impression_asset, dict) and impression_asset.get("id"):
             return impression_asset
         current_id = impression.get("asset_id") if isinstance(impression, dict) else None
-        current_id = current_id or frame.get("representative_asset_id")
         if current_id:
             for asset in assets:
                 if asset.get("id") == current_id:
                     return asset
-        return assets[0] if assets else {}
+        # A cover image or the first library asset is not the displayed photo.
+        return {}
 
     async def navigate(self, frame_id: str, direction: int) -> None:
         frame = self.data.get(frame_id, {})
@@ -76,9 +84,7 @@ class AuraCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
         target = assets[(index + direction) % len(assets)]
         await self.api.show_now(frame_id, target["id"])
         await self.async_request_refresh()
-        # The frames endpoint can lag behind a successful goto request.
-        # Keep the coordinator's navigation cursor aligned with the write.
-        self.data[frame_id]["current_asset"] = target
+        # Only frame telemetry may change current_asset, not a sent command.
 
     async def async_close(self) -> None:
         await self.api.close()
