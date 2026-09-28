@@ -14,7 +14,7 @@ NUMBERS = (("brightness", "Brightness", 0, 100, 1), ("slideshow_interval", "Slid
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
     coordinator: AuraCoordinator = hass.data[DOMAIN][entry.entry_id]
-    async_add_entities([AuraFrameNumber(coordinator, frame_id, *definition) for frame_id in coordinator.data for definition in NUMBERS])
+    async_add_entities([AuraFrameNumber(coordinator, frame_id, *definition) for frame_id in coordinator.data for definition in NUMBERS if coordinator.data[frame_id].get(definition[0]) is not None])
 
 
 class AuraFrameNumber(AuraFrameEntity, NumberEntity):
