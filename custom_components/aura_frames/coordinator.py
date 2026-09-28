@@ -80,6 +80,9 @@ class AuraCoordinator(DataUpdateCoordinator[dict[str, dict[str, Any]]]):
         target = assets[(index + direction) % len(assets)]
         await self.api.show_now(frame_id, target["id"])
         await self.async_request_refresh()
+        # The frames endpoint can lag behind a successful goto request.
+        # Keep the coordinator's navigation cursor aligned with the write.
+        self.data[frame_id]["current_asset"] = target
 
     async def async_close(self) -> None:
         return None
