@@ -9,7 +9,7 @@ from .const import DOMAIN
 from .control_entities import AuraFrameEntity
 from .coordinator import AuraCoordinator
 
-BUTTONS = (("next", "Next", "mdi:skip-next"), ("previous", "Previous", "mdi:skip-previous"), ("show_now", "Show now", "mdi:play-box"), ("sleep", "Sleep", "mdi:sleep"), ("wake", "Wake", "mdi:weather-sunny"), ("refresh", "Refresh", "mdi:refresh"))
+BUTTONS = (("next", "Next", "mdi:skip-next"), ("previous", "Previous", "mdi:skip-previous"), ("show_now", "Show now", "mdi:play-box"), ("refresh", "Refresh", "mdi:refresh"))
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback) -> None:
